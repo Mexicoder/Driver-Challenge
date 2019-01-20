@@ -2,6 +2,7 @@
 const express = require('express');
 // const MongoClient    = require('mongodb').MongoClient;
 const bodyParser = require('body-parser');
+var cors = require('cors')
 const app = express();
 const data = require('./app/data');
 
@@ -13,7 +14,7 @@ let driver = {
     "legProgress": "33"
 };
 
-
+app.use(cors())
 
 app.use(bodyParser.urlencoded({ extended: true }));
 

@@ -7,64 +7,68 @@ import CanvasGrid from './CanvasGrid.js';
 class Game extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {}
+    this.state = {
+      isStopsLoaded: false,
+      Stops: [],
+      isLegsLoaded: false,
+      Legs: [],
+    }
   }
 
-  // handleClick(i) {
-  //   const history = this.state.history.slice(0, this.state.stepNumber + 1); // throw away future moves bc now they are garbage
-  //   const current = history[history.length - 1];
-  //   const coords = current.coords.slice(); // immutable
-  //   if (calculateWinner(coords) || coords[i]) {
-  //     return;
-  //   }
-  //   coords[i] = this.state.xIsNext ? 'X' : 'O';
-  //   this.setState({
-  //     history: history.concat([ // use concat instead of push be it won't mutate the original array
-  //       {
-  //         coords: coords,
-  //       }
-  //     ]),
-  //     stepNumber: history.length,
-  //     xIsNext: !this.state.xIsNext,
-  //   });
-  // }
+  componentDidMount() {
+    fetch("http://localhost:8000/legs")
+      .then(res => res.json())
+      .then(
+        (result) => {
+          this.setState({
+            isLegsLoaded: true,
+            Legs: result,
+          });
+        },
+        // Note: it's important to handle errors here instead of a catch() block so that we don't swallow exceptions from actual bugs in components.
+        (error) => {
+          this.setState({
+            isLoaded: true,
+            error
+          });
+        }
+      )
 
-  // // history stuff
-  // jumpTo(step) {
-  //   this.setState({
-  //     stepNumber: step,
-  //     xIsNext: (step % 2) === 0,
-  //   })
-  // }
+    fetch("http://localhost:8000/stops")
+      .then(res => res.json())
+      .then(
+        (result) => {
+          this.setState({
+            isStopsLoaded: true,
+            Stops: result,
+          });
+        },
+        // Note: it's important to handle errors here instead of a catch() block so that we don't swallow exceptions from actual bugs in components.
+        (error) => {
+          this.setState({
+            isLoaded: true,
+            error
+          });
+        }
+      )
+  }
 
   render() {
-    // const history = this.state.history;
-    // const current = history[this.state.stepNumber];
-    // const winner = calculateWinner(current.coords);
-
-    // const moves = history.map((step, move) => {
-    //   const desc = move ?
-    //     'Go to move ' + move :
-    //     'Go to game start';
-    //   return (
-    //     <li key={move}>
-    //       <button onClick={() => this.jumpTo(move)}>{desc}</button>
-    //     </li>
-    //   );
-    // });
-
-    // let status;
-    // if (winner) {
-    //   status = 'Winner: ' + winner;
-    // } else {
-    //   status = 'Next player: ' + (this.state.xIsNext ? 'X' : 'O');
-    // }
-
-
+    const { error, isLegsLoaded, Legs, isStopsLoaded, Stops } = this.state;
+    if (error) {
+      return <div>Error: {error.message}</div>;
+    } else if (!isLegsLoaded) {
+      return <div>Loading Legs...</div>;
+    } else if (!isStopsLoaded) {
+      return <div>Loading Stops...</div>;
+    }
     return (
       <div className="game">
         <div className="game-board">
-          <CanvasGrid/>
+          <CanvasGrid
+            Legs={Legs}
+            Stops={Stops}
+          />
         </div>
       </div>
     );
@@ -77,23 +81,3 @@ ReactDOM.render(
   <Game />,
   document.getElementById('root')
 );
-
-// function calculateWinner(coords) {
-//   const lines = [
-//     [0, 1, 2],
-//     [3, 4, 5],
-//     [6, 7, 8],
-//     [0, 3, 6],
-//     [1, 4, 7],
-//     [2, 5, 8],
-//     [0, 4, 8],
-//     [2, 4, 6],
-//   ];
-//   for (let i = 0; i < lines.length; i++) {
-//     const [a, b, c] = lines[i];
-//     if (coords[a] && coords[a] === coords[b] && coords[a] === coords[c]) {
-//       return coords[a];
-//     }
-//   }
-//   return null;
-// }

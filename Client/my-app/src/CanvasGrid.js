@@ -9,27 +9,54 @@ class CanvasGrid extends React.Component {
             cellWidth: 5,
             canvasWidth: 1000,
             canvasHeight: 1000,
+            stopindex: 0,
         }
     }
 
-    drawLeg(x1,y1,x2,y2){
+    drawStops() {
+        const canvas = this.refs.canvas;
+        const ctx = canvas.getContext("2d");
+        var radius = 2.5;
+        const stops = this.props.Stops.slice();
+
+        for (const stop of stops) {
+            const stopX = stop.x + this.state.offset;
+            const stopY = stop.y + this.state.offset;
+
+            ctx.beginPath();
+            ctx.arc(stopX, stopY, radius, 0, 2 * Math.PI, false);
+            ctx.fillStyle = 'green';
+            ctx.fill();
+        }
+        ctx.stroke();
+    }
+
+    drawLegs() {
         const canvas = this.refs.canvas
         const ctx = canvas.getContext("2d")
 
-        const start = {
-            x:x1*this.state.cellWidth+this.state.offset,
-            y:y1*this.state.cellWidth+this.state.offset,
-        }
-        const end = {
-            x:x2*this.state.cellWidth+this.state.offset,
-            y:y2*this.state.cellWidth+this.state.offset,
-        }
+        const legs = this.props.Legs.slice();
+        const stops = this.props.Stops.slice();
 
-        ctx.beginPath();
-        ctx.moveTo(start.x,start.y);
-        ctx.lineTo(end.x,end.y);
-        ctx.strokeStyle='red';
-        ctx.stroke();
+        for (let i = 1; i < legs.length; i++) {
+
+            const startStop = stops.find(stop => stop.name === legs[i - 1].startStop);
+            const endStop = stops.find(stop => stop.name === legs[i].endStop);
+
+            const start = {
+                x: startStop.x + this.state.offset,
+                y: startStop.y + this.state.offset,
+            }
+            const end = {
+                x: endStop.x + this.state.offset,
+                y: endStop.y + this.state.offset,
+            }
+            ctx.beginPath();
+            ctx.moveTo(start.x, start.y);
+            ctx.lineTo(end.x, end.y);
+            ctx.strokeStyle = 'red';
+            ctx.stroke();
+        }
     }
 
     componentDidMount() {
@@ -55,15 +82,26 @@ class CanvasGrid extends React.Component {
 
         return (
             <div>
-                <button onClick={() => this.drawLeg(20, 10, 10, 10)}>draw leg</button>
                 <canvas
                     ref='canvas'
                     width='1000'
                     height='1000'>
                 </canvas>
+                <div>
+                    <button onClick={() => { this.drawStops() }}>drawStops</button>
+                    <button onClick={() => { this.drawLegs() }}>drawLegs</button>
+                </div>
+                <div>
+                    <ul>
+                        {this.props.Stops.map(stop => (
+                            <li key={stop.name}>
+                                name: {stop.name} x: {stop.x} y: {stop.y}
+                            </li>
+                        ))}
+                    </ul>
+                </div>
             </div>
         );
-        // onClick={showCoords(event)}
     }
 
 }
