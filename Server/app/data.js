@@ -1,5 +1,4 @@
 module.exports = {
-    coordinates: [],
     legs: [
         { "startStop": "A", "endStop": "B", "speedLimit": 100, "legID": "AB" },
         { "startStop": "B", "endStop": "C", "speedLimit": 60, "legID": "BC" },
@@ -26,5 +25,9 @@ module.exports = {
         { "name": "J", "x": 35, "y": 15 },
         { "name": "K", "x": 25, "y": 15 },
         { "name": "L", "x": 20, "y": 10 }
-    ]
+    ],
+    driver: {
+        "activeLegID": "FG",
+        "legProgress": "33"
+    }
 };

@@ -1,24 +1,58 @@
 // server.js
 const express = require('express');
-// const MongoClient    = require('mongodb').MongoClient;
 const bodyParser = require('body-parser');
-var cors = require('cors')
-const app = express();
+const cors = require('cors')
 const data = require('./app/data');
-
+const WebSocket = require('ws');
+const app = express();
 
 const port = 8000;
-
-let driver = {
-    "activeLegID": "FG",
-    "legProgress": "33"
-};
 
 app.use(cors())
 
 app.use(bodyParser.urlencoded({ extended: true }));
 
 require('./app/routes')(app, data);
-app.listen(port, () => {
+
+const server = app.listen(port, () => {
     console.log('We are live on ' + port);
 });
+
+// const wss = new WebSocket.Server({ port: 8080 });
+const wss = new WebSocket.Server({
+    server,
+});
+
+wss.on('connection', function connection(ws, req) {
+    console.log("websocket connection open");
+
+    ws.on('message', function incoming(message) {
+        console.log('received: %s', message);
+            // Broadcast to everyone else.
+            wss.clients.forEach(function each(client) {
+              if (client !== ws && client.readyState === WebSocket.OPEN) {
+                client.send(message);
+                client.send("broadcast message");
+              }
+            });
+    });
+
+    ws.send('hello');
+
+    // ws.send({msg: 'something server'});
+    setTimeout(() => {
+        ws.send('yo, im a delayed msg 2')
+    }, 1000)
+});
+
+
+// Broadcast to all.
+// wss.broadcast = function broadcast(data) {
+//     console.log('Broadcast to client');
+//     wss.clients.forEach(function each(client) {
+//         console.log('Broadcast to client');
+//         if (client.readyState === WebSocket.OPEN) {
+//             client.send(data);
+//         }
+//     });
+// };

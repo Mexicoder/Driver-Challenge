@@ -1,5 +1,4 @@
 import React from 'react';
-// import Coord from './Coord.js';
 
 class CanvasGrid extends React.Component {
     constructor(props) {
@@ -13,11 +12,37 @@ class CanvasGrid extends React.Component {
         }
     }
 
+
+    sendMessage() {
+        this.props.socket.send('something client 2'); 
+    }
+
+    drawDriverDriving() {
+        // const canvas = this.refs.canvas;
+        // const ctx = canvas.getContext("2d");
+        // const radius = 3;
+        // const stops = this.props.stops.slice();
+        // const driverLeg = { ...this.props.driver }.activeLegID.split();
+
+        // // const driverX = stops.find(stop => stop.name === driverLeg[0]);
+        // // const driverY = stops.find(stop => stop.name === driverLeg[1]);
+
+
+        // const driverX = stop[0].x + this.state.offset;
+        // const driverY = stop[0].y + this.state.offset;
+
+        // ctx.beginPath();
+        // ctx.arc(stopX, stopY, radius, 0, 2 * Math.PI, false);
+        // ctx.fillStyle = 'pink';
+        // ctx.fill();
+        // ctx.stroke();
+    }
+
     drawStops() {
         const canvas = this.refs.canvas;
         const ctx = canvas.getContext("2d");
-        var radius = 2.5;
-        const stops = this.props.Stops.slice();
+        const radius = 2.5;
+        const stops = this.props.stops.slice();
 
         for (const stop of stops) {
             const stopX = stop.x + this.state.offset;
@@ -35,8 +60,8 @@ class CanvasGrid extends React.Component {
         const canvas = this.refs.canvas
         const ctx = canvas.getContext("2d")
 
-        const legs = this.props.Legs.slice();
-        const stops = this.props.Stops.slice();
+        const legs = this.props.legs.slice();
+        const stops = this.props.stops.slice();
 
         for (let i = 1; i < legs.length; i++) {
 
@@ -76,10 +101,10 @@ class CanvasGrid extends React.Component {
         ctx.strokeStyle = 'grey';
         ctx.stroke();
         // drawLeg(20,10,10,10);
+
     }
 
     render() {
-
         return (
             <div>
                 <canvas
@@ -90,10 +115,12 @@ class CanvasGrid extends React.Component {
                 <div>
                     <button onClick={() => { this.drawStops() }}>drawStops</button>
                     <button onClick={() => { this.drawLegs() }}>drawLegs</button>
+                    <button onClick={() => { this.drawDriverDriving() }}>drawDriverDriving</button>
+                    <button onClick={() => { this.sendMessage() }}>sendMessage</button>
                 </div>
                 <div>
                     <ul>
-                        {this.props.Stops.map(stop => (
+                        {this.props.stops.map(stop => (
                             <li key={stop.name}>
                                 name: {stop.name} x: {stop.x} y: {stop.y}
                             </li>

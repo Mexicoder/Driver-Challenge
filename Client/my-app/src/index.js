@@ -1,17 +1,20 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import CanvasGrid from './CanvasGrid.js';
+import CanvasGrid from './CanvasGrid';
+import DriverForm from './DriverForm';
 
-
-class Game extends React.Component {
+class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       isStopsLoaded: false,
-      Stops: [],
+      stops: [],
       isLegsLoaded: false,
-      Legs: [],
+      legs: [],
+      isDriverLoaded: false,
+      driver: {},
+      socket: new WebSocket('ws://localhost:8000'),
     }
   }
 
@@ -22,17 +25,17 @@ class Game extends React.Component {
         (result) => {
           this.setState({
             isLegsLoaded: true,
-            Legs: result,
+            legs: result,
           });
         },
         // Note: it's important to handle errors here instead of a catch() block so that we don't swallow exceptions from actual bugs in components.
         (error) => {
           this.setState({
-            isLoaded: true,
+            isLegsLoaded: true,
             error
           });
         }
-      )
+      );
 
     fetch("http://localhost:8000/stops")
       .then(res => res.json())
@@ -40,36 +43,68 @@ class Game extends React.Component {
         (result) => {
           this.setState({
             isStopsLoaded: true,
-            Stops: result,
+            stops: result,
           });
         },
         // Note: it's important to handle errors here instead of a catch() block so that we don't swallow exceptions from actual bugs in components.
         (error) => {
           this.setState({
-            isLoaded: true,
+            isStopsLoaded: true,
             error
           });
         }
-      )
+      );
+
+    fetch("http://localhost:8000/driver")
+      .then(res => res.json())
+      .then(
+        (result) => {
+          this.setState({
+            isDriverLoaded: true,
+            driver: result,
+          });
+        },
+        // Note: it's important to handle errors here instead of a catch() block so that we don't swallow exceptions from actual bugs in components.
+        (error) => {
+          this.setState({
+            isDriverLoaded: true,
+            error
+          });
+        }
+      );
+
+    const socket = this.state.socket;
+
+    socket.onopen = function () {
+      socket.send('something client ');
+    };
+    socket.onmessage = function (event) {
+      this.setState = { Message: event.data };
+      console.log(event.data);
+    };
   }
 
   render() {
-    const { error, isLegsLoaded, Legs, isStopsLoaded, Stops } = this.state;
+    const { error, isLegsLoaded, legs, isStopsLoaded, stops, driver, socket } = this.state;
     if (error) {
       return <div>Error: {error.message}</div>;
     } else if (!isLegsLoaded) {
-      return <div>Loading Legs...</div>;
+      return <div>Loading legs...</div>;
     } else if (!isStopsLoaded) {
-      return <div>Loading Stops...</div>;
+      return <div>Loading stops...</div>;
     }
     return (
-      <div className="game">
-        <div className="game-board">
-          <CanvasGrid
-            Legs={Legs}
-            Stops={Stops}
-          />
-        </div>
+      <div >
+        <DriverForm
+          legs={legs}
+          driver={driver}
+        />
+        <CanvasGrid
+          legs={legs}
+          stops={stops}
+          driver={driver}
+          socket={socket}
+        />
       </div>
     );
   }
@@ -78,6 +113,6 @@ class Game extends React.Component {
 // ========================================
 
 ReactDOM.render(
-  <Game />,
+  <App />,
   document.getElementById('root')
 );
