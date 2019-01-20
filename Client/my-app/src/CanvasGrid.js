@@ -5,16 +5,16 @@ class CanvasGrid extends React.Component {
         super(props);
         this.state = {
             offset: 2.5,
-            cellWidth: 5,
-            canvasWidth: 1000,
-            canvasHeight: 1000,
+            cellWidth: 10,
+            canvasWidth: 500,
+            canvasHeight: 500,
             stopindex: 0,
         }
     }
 
 
     sendMessage() {
-        this.props.socket.send('something client 2'); 
+        this.props.socket.send('something client 2');
     }
 
     drawDriverDriving() {
@@ -45,8 +45,8 @@ class CanvasGrid extends React.Component {
         const stops = this.props.stops.slice();
 
         for (const stop of stops) {
-            const stopX = stop.x + this.state.offset;
-            const stopY = stop.y + this.state.offset;
+            const stopX = stop.x * 2 + this.state.offset;
+            const stopY = stop.y * 2 + this.state.offset;
 
             ctx.beginPath();
             ctx.arc(stopX, stopY, radius, 0, 2 * Math.PI, false);
@@ -69,12 +69,12 @@ class CanvasGrid extends React.Component {
             const endStop = stops.find(stop => stop.name === legs[i].endStop);
 
             const start = {
-                x: startStop.x + this.state.offset,
-                y: startStop.y + this.state.offset,
+                x: startStop.x * 2 + this.state.offset,
+                y: startStop.y * 2 + this.state.offset,
             }
             const end = {
-                x: endStop.x + this.state.offset,
-                y: endStop.y + this.state.offset,
+                x: endStop.x * 2 + this.state.offset,
+                y: endStop.y * 2 + this.state.offset,
             }
             ctx.beginPath();
             ctx.moveTo(start.x, start.y);
@@ -87,16 +87,18 @@ class CanvasGrid extends React.Component {
     componentDidMount() {
         const canvas = this.refs.canvas
         const ctx = canvas.getContext("2d")
+        const width = this.state.canvasWidth;
+        const height = this.state.canvasHeight;
 
         ctx.beginPath();
 
         for (var x = this.state.offset; x < this.state.canvasWidth; x += this.state.cellWidth) {
             ctx.moveTo(x, 0);
-            ctx.lineTo(x, 1000);
+            ctx.lineTo(x, width);
         }
         for (var y = this.state.offset; y < this.state.canvasHeight; y += this.state.cellWidth) {
             ctx.moveTo(0, y);
-            ctx.lineTo(1000, y);
+            ctx.lineTo(height, y);
         }
         ctx.strokeStyle = 'grey';
         ctx.stroke();
@@ -109,8 +111,8 @@ class CanvasGrid extends React.Component {
             <div>
                 <canvas
                     ref='canvas'
-                    width='1000'
-                    height='1000'>
+                    width={this.state.canvasWidth}
+                    height={this.state.canvasHeight}>
                 </canvas>
                 <div>
                     <button onClick={() => { this.drawStops() }}>drawStops</button>
