@@ -131,25 +131,57 @@ class CanvasGrid extends React.Component {
     }
 
     animateLine(ctx, startX, startY, endX, endY) {
-        let amount = 0;
-        let interval = setInterval(function () {
-            let movedX = Math.floor(startX + (endX - startX) * amount);
-            let movedY = Math.floor(startY + (endY - startY) * amount);
-            // stop drawing
-            if(movedY >= endY)
-            if(movedX >= endX)
-            if(movedY <= endY)
-            if(movedX <= endX)
-            if (movedX === endX && movedY === endY) {
-                clearInterval(interval);
+        var points = [];
+
+        var dx = endX - startX;
+        var dy = endY - startY;
+        for (var j = 0; j < 100; j++) {
+            var x = startX + dx * j / 100;
+            var y = startY + dy * j / 100;
+            points.push({
+                x: x,
+                y: y
+            });
+        }
+
+        let t = 1;
+
+        ctx.lineWidth = 5;
+        ctx.strokeStyle = "blue";
+        ctx.lineCap = "round";
+
+        let animate = () => {
+            if (t < points.length - 1) {
+                requestAnimationFrame(animate);
             }
+            // draw a line segment from the last waypoint
+            // to the current waypoint
             ctx.beginPath();
-            amount += 0.01;
-            ctx.strokeStyle = "purple";
-            ctx.moveTo(startX, startY);
-            ctx.lineTo(movedX, movedY);
+            ctx.moveTo(points[t - 1].x, points[t - 1].y);
+            ctx.lineTo(points[t].x, points[t].y);
             ctx.stroke();
-        }, 10);
+            t++;
+        }
+        animate();
+        // let amount = 0;
+        // let interval = setInterval(function () {
+        //     let movedX = Math.floor(startX + (endX - startX) * amount);
+        //     let movedY = Math.floor(startY + (endY - startY) * amount);
+        //     // stop drawing
+        //     if(movedY >= endY)
+        //     if(movedX >= endX)
+        //     if(movedY <= endY)
+        //     if(movedX <= endX)
+        //     if (movedX === endX && movedY === endY) {
+        //         clearInterval(interval);
+        //     }
+        //     ctx.beginPath();
+        //     amount += 0.01;
+        //     ctx.strokeStyle = "purple";
+        //     ctx.moveTo(startX, startY);
+        //     ctx.lineTo(movedX, movedY);
+        //     ctx.stroke();
+        // }, 10);
     }
 
     componentDidMount() {
