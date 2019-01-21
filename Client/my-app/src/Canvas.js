@@ -1,9 +1,9 @@
 import React from 'react';
-import DriverForm from './DriverForm';
-// import LegsDropDown from './LegsDropDown';
+import LegsDropDown from './LegsDropDown';
+import LegProgess from './LegProgess';
 
 
-class CanvasGrid extends React.Component {
+class Canvas extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -21,22 +21,29 @@ class CanvasGrid extends React.Component {
         this.legChange = this.legChange.bind(this);
     }
 
-    legOptions(){
-        let legs = [];
-        for (const leg of this.props.legs) {
-            legs.push((
-                <option
-                    key={leg.legID}
-                    value={leg.legID}>
-                    {leg.legID}
-                </option>
-            ));
-        }
-        return legs;
+    updateDriverLocation(){
+        fetch("http://localhost:8000/driver",{
+            method: "PUT",
+        })
+        .then(res => res.json())
+        .then(
+          (result) => {
+            this.setState({
+              isDriverLoaded: true,
+              driver: result,
+            });
+          },
+          // Note: it's important to handle errors here instead of a catch() block so that we don't swallow exceptions from actual bugs in components.
+          (error) => {
+            this.setState({
+              isDriverLoaded: true,
+              error
+            });
+          }
+        );
     }
 
     legChange(leg) {
-        console.log(leg);
         this.setState({ selectedLeg: leg });
 
         const canvas = this.refs.canvas
@@ -61,27 +68,6 @@ class CanvasGrid extends React.Component {
 
     sendMessage() {
         this.props.socket.send('something client 2');
-    }
-
-    drawDriverDriving() {
-        // const canvas = this.refs.canvas;
-        // const ctx = canvas.getContext("2d");
-        // const radius = 3;
-        // const stops = this.props.stops.slice();
-        // const driverLeg = { ...this.props.driver }.activeLegID.split();
-
-        // // const driverX = stops.find(stop => stop.name === driverLeg[0]);
-        // // const driverY = stops.find(stop => stop.name === driverLeg[1]);
-
-
-        // const driverX = stop[0].x + this.state.offset;
-        // const driverY = stop[0].y + this.state.offset;
-
-        // ctx.beginPath();
-        // ctx.arc(stopX, stopY, radius, 0, 2 * Math.PI, false);
-        // ctx.fillStyle = 'pink';
-        // ctx.fill();
-        // ctx.stroke();
     }
 
     drawStops() {
@@ -154,6 +140,8 @@ class CanvasGrid extends React.Component {
             if (t < points.length - 1) {
                 requestAnimationFrame(animate);
             }
+            this.inputElement.value = Math.floor(t / points.length * 100);
+           
             // draw a line segment from the last waypoint
             // to the current waypoint
             ctx.beginPath();
@@ -163,25 +151,6 @@ class CanvasGrid extends React.Component {
             t++;
         }
         animate();
-        // let amount = 0;
-        // let interval = setInterval(function () {
-        //     let movedX = Math.floor(startX + (endX - startX) * amount);
-        //     let movedY = Math.floor(startY + (endY - startY) * amount);
-        //     // stop drawing
-        //     if(movedY >= endY)
-        //     if(movedX >= endX)
-        //     if(movedY <= endY)
-        //     if(movedX <= endX)
-        //     if (movedX === endX && movedY === endY) {
-        //         clearInterval(interval);
-        //     }
-        //     ctx.beginPath();
-        //     amount += 0.01;
-        //     ctx.strokeStyle = "purple";
-        //     ctx.moveTo(startX, startY);
-        //     ctx.lineTo(movedX, movedY);
-        //     ctx.stroke();
-        // }, 10);
     }
 
     componentDidMount() {
@@ -203,36 +172,20 @@ class CanvasGrid extends React.Component {
         ctx.strokeStyle = 'grey';
         ctx.stroke();
         // drawLeg(20,10,10,10);
-
-
     }
 
     render() {
         return (
             <div>
                 <div>
-                    {/* <div>
-                        <select
-                            value={this.selectedLeg}
-                            onChange={this.legChange}
-                        >
-                            {this.legOptions()}
-                        </select>
-                    </div>
-                    <div>
-                        <input readOnly value={this.props.driver.legProgress + '%'}></input>
-                    </div> */}
-                    {/* <LegsDropDown
-                    legs={this.props.legs}
-                        driver={this.props.driver}
-                        onChange={()=>{this.legChange();}}
-                        options={() =>{this.legOptions()}}
-                    /> */}
-                    <DriverForm
+                    <LegsDropDown
                         legs={this.props.legs}
                         driver={this.props.driver}
                         onChange={this.legChange}
-                    />
+                    ></LegsDropDown>
+                    <LegProgess
+                        inputRef={el => (this.inputElement = el)} 
+                    ></LegProgess>
                 </div>
                 <div>
                     <canvas
@@ -244,7 +197,6 @@ class CanvasGrid extends React.Component {
                 <div>
                     <button onClick={() => { this.drawStops() }}>drawStops</button>
                     <button onClick={() => { this.drawLegs() }}>drawLegs</button>
-                    <button onClick={() => { this.drawDriverDriving() }}>drawDriverDriving</button>
                     <button onClick={() => { this.sendMessage() }}>sendMessage</button>
                 </div>
                 <div>
@@ -262,4 +214,6 @@ class CanvasGrid extends React.Component {
 
 }
 
-export default CanvasGrid;
+export default Canvas;
+
+

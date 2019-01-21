@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import CanvasGrid from './CanvasGrid';
+import Canvas from './Canvas';
 
 class App extends React.Component {
   constructor(props) {
@@ -94,7 +94,7 @@ class App extends React.Component {
     }
     return (
       <div >
-        <CanvasGrid
+        <Canvas
           legs={legs}
           stops={stops}
           driver={driver}
