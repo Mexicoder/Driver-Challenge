@@ -19,6 +19,7 @@ class LegsDropDown extends React.Component {
 
     render() {
 
+        // make this better with map 
         let legs = [];
         for (const leg of this.props.legs) {
             legs.push((

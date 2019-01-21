@@ -8,6 +8,7 @@ Built by John Friesen
 
 ```
 cd Server
+npm install
 npm start
 ```
 
@@ -15,6 +16,8 @@ npm start
 
 ```
 cd Client
+cd my-app
+npm install
 npm start
 ```
 

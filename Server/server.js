@@ -19,7 +19,6 @@ const server = app.listen(port, () => {
     console.log('We are live on ' + port);
 });
 
-// const wss = new WebSocket.Server({ port: 8080 });
 const wss = new WebSocket.Server({
     server,
 });

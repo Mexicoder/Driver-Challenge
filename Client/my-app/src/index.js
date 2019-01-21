@@ -27,7 +27,6 @@ class App extends React.Component {
             legs: result,
           });
         },
-        // Note: it's important to handle errors here instead of a catch() block so that we don't swallow exceptions from actual bugs in components.
         (error) => {
           this.setState({
             isLegsLoaded: true,
@@ -45,7 +44,6 @@ class App extends React.Component {
             stops: result,
           });
         },
-        // Note: it's important to handle errors here instead of a catch() block so that we don't swallow exceptions from actual bugs in components.
         (error) => {
           this.setState({
             isStopsLoaded: true,

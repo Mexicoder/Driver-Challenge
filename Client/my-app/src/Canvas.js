@@ -8,8 +8,6 @@ class Canvas extends React.Component {
         super(props);
         this.state = {
             scale: 3,
-            // offset: 2.5,
-            // scale: 2,
             cellWidth: 10,
             canvasWidth: 500,
             canvasHeight: 500,

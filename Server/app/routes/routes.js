@@ -1,6 +1,5 @@
 module.exports = function (app, db) {
 
-
     // get list of legs
     app.get('/legs', (req, res) => {
         console.log('GET legs');
