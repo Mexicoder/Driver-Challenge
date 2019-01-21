@@ -3,11 +3,16 @@ import React from 'react';
 
 function LegProgess(props) {
     return (
-        <input
-            ref={props.inputRef}
-            readOnly
-            value={props.legProgress || 0 + '%'}
-        ></input>
+        <div>
+        <span>Leg Progess: </span>
+            <span>
+                <input
+                    ref={props.inputRef}
+                    readOnly
+                    value={props.legProgress || 0 + '%'}
+                ></input>
+            </span>
+        </div>
     ); 
 }
 

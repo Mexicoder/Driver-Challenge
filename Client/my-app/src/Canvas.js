@@ -225,15 +225,6 @@ class Canvas extends React.Component {
                     <button onClick={() => { this.drawStops() }}>drawStops</button>
                     <button onClick={() => { this.drawLegs() }}>drawLegs</button>
                 </div>
-                <div>
-                    <ul>
-                        {this.props.stops.map(stop => (
-                            <li key={stop.name}>
-                                name: {stop.name} x: {stop.x} y: {stop.y}
-                            </li>
-                        ))}
-                    </ul>
-                </div>
             </div>
         );
     }

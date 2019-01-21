@@ -32,12 +32,15 @@ class LegsDropDown extends React.Component {
 
         return (
             <div>
-                <select
-                    value={this.state.selectedLeg || this.props.driver.activeLegID}
-                    onChange={this.handleChange}
-                >
-                    {legs}
-                </select>
+                <span>Active Leg: </span>
+                <span>
+                    <select
+                        value={this.state.selectedLeg || this.props.driver.activeLegID}
+                        onChange={this.handleChange}
+                    >
+                        {legs}
+                    </select>
+                </span>
             </div>
         );
     }
