@@ -14,37 +14,32 @@ class Canvas extends React.Component {
             cellWidth: 10,
             canvasWidth: 500,
             canvasHeight: 500,
-            stopindex: 0,
-            selectedLeg: null,
+            driver: {},
         }
 
         this.legChange = this.legChange.bind(this);
     }
 
-    updateDriverLocation(){
-        fetch("http://localhost:8000/driver",{
+    updateServerDriverLocation() {
+        fetch("http://localhost:8000/driver", {
             method: "PUT",
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(this.props.driver),
         })
-        .then(res => res.json())
-        .then(
-          (result) => {
-            this.setState({
-              isDriverLoaded: true,
-              driver: result,
-            });
-          },
-          // Note: it's important to handle errors here instead of a catch() block so that we don't swallow exceptions from actual bugs in components.
-          (error) => {
-            this.setState({
-              isDriverLoaded: true,
-              error
-            });
-          }
-        );
+            .then(res => res.json())
+            .then(
+                (result) => {
+                    console.log('driver put success');
+                },
+                (error) => {
+                    console.log({ msg: 'driver put error', error });
+                }
+            );
     }
 
     legChange(leg) {
-        this.setState({ selectedLeg: leg });
+        this.setState({ driver: {activeLegID:leg.legID,legProgress:0} });
+        this.props.socket.send(JSON.stringify({ activeLegID: leg.legID }));
 
         const canvas = this.refs.canvas
         const ctx = canvas.getContext("2d")
@@ -63,11 +58,7 @@ class Canvas extends React.Component {
             y: endStop.y * this.state.scale + this.state.offset,
         }
 
-        this.animateLine(ctx, start.x, start.y, end.x, end.y);
-    }
-
-    sendMessage() {
-        this.props.socket.send('something client 2');
+        this.animateLegProgress(ctx, start.x, start.y, end.x, end.y);
     }
 
     drawStops() {
@@ -82,14 +73,18 @@ class Canvas extends React.Component {
 
             ctx.beginPath();
             ctx.arc(stopX, stopY, radius, 0, 2 * Math.PI, false);
+            ctx.strokeStyle = 'green';
             ctx.fillStyle = 'green';
             ctx.fill();
-
+            ctx.stroke();
+            
             ctx.font = "10 Verdana";
-            ctx.fillStyle = 'blue';
+            ctx.strokeStyle = 'green';
+            ctx.fillStyle = 'green';
             ctx.fillText(stop.name, stopX + 5, stopY + 5);
+            ctx.stroke();
         }
-        ctx.stroke();
+        
     }
 
     drawLegs() {
@@ -99,10 +94,10 @@ class Canvas extends React.Component {
         const legs = this.props.legs.slice();
         const stops = this.props.stops.slice();
 
-        for (let i = 1; i < legs.length; i++) {
+        for (const leg of legs) {
 
-            const startStop = stops.find(stop => stop.name === legs[i - 1].startStop);
-            const endStop = stops.find(stop => stop.name === legs[i].endStop);
+            const startStop = stops.find(stop => stop.name === leg.startStop);
+            const endStop = stops.find(stop => stop.name === leg.endStop);
 
             const start = {
                 x: startStop.x * this.state.scale + this.state.offset,
@@ -112,11 +107,11 @@ class Canvas extends React.Component {
                 x: endStop.x * this.state.scale + this.state.offset,
                 y: endStop.y * this.state.scale + this.state.offset,
             }
-            this.animateLine(ctx, start.x, start.y, end.x, end.y);
+            this.animateLegProgress(ctx, start.x, start.y, end.x, end.y);
         }
     }
 
-    animateLine(ctx, startX, startY, endX, endY) {
+    animateLegProgress(ctx, startX, startY, endX, endY) {
         var points = [];
 
         var dx = endX - startX;
@@ -130,27 +125,52 @@ class Canvas extends React.Component {
             });
         }
 
-        let t = 1;
+        let legIncrement = 1;
+        let driverIncrement = 1;
 
-        ctx.lineWidth = 5;
-        ctx.strokeStyle = "blue";
-        ctx.lineCap = "round";
-
-        let animate = () => {
-            if (t < points.length - 1) {
-                requestAnimationFrame(animate);
+        let animateLegProgress = () => {
+            if (legIncrement < points.length - 1) {
+                requestAnimationFrame(animateLegProgress);
+            } else {
+                ctx.beginPath();
+                ctx.arc(points[points.length - 1].x, points[points.length - 1].y, 3.5, 0, 2 * Math.PI, false);
+                ctx.strokeStyle = 'red';
+                ctx.fillStyle = 'red';
+                ctx.fill();
+                ctx.stroke();
+                this.updateServerDriverLocation();
             }
-            this.inputElement.value = Math.floor(t / points.length * 100);
-           
+            const legProgress = Math.floor(legIncrement / points.length * 100);
+            this.inputElement.value = legProgress
+            this.props.socket.send(JSON.stringify({ legProgress: legProgress }));
+
             // draw a line segment from the last waypoint
             // to the current waypoint
             ctx.beginPath();
-            ctx.moveTo(points[t - 1].x, points[t - 1].y);
-            ctx.lineTo(points[t].x, points[t].y);
+            ctx.lineWidth = 5;
+            ctx.strokeStyle = "blue";
+            ctx.fillStyle = 'blue';
+            ctx.lineCap = "round";
+            ctx.moveTo(points[legIncrement - 1].x, points[legIncrement - 1].y);
+            ctx.lineTo(points[legIncrement].x, points[legIncrement].y);
             ctx.stroke();
-            t++;
+            legIncrement++;
         }
-        animate();
+        let animateDriverProgress = () => {
+            if (driverIncrement < points.length - 1) {
+                requestAnimationFrame(animateDriverProgress);
+            }
+            //driver
+            ctx.beginPath();
+            ctx.arc(points[driverIncrement].x, points[driverIncrement].y, 1.5, 0, 2 * Math.PI, false);
+            ctx.fillStyle = 'red';
+            ctx.fill();
+            ctx.stroke();
+
+            driverIncrement++;
+        }
+        animateLegProgress();
+        //animateDriverProgress();
     }
 
     componentDidMount() {
@@ -172,6 +192,28 @@ class Canvas extends React.Component {
         ctx.strokeStyle = 'grey';
         ctx.stroke();
         // drawLeg(20,10,10,10);
+
+        // My attempt at adding sockets
+        //const legs = { ...this.props.legs };
+        // this.props.socket.onmessage = function (event) {
+        //     const incomingData = JSON.parse(event.data);
+        //     console.log(incomingData);
+        //     if (incomingData) {
+        //         if (incomingData.legProgress) {
+        //             this.props.driver.legProgress = incomingData.legProgress;
+        //             // this.setState({
+        //             //   driver:{...this.props.driver,legProgress: incomingData.legProgress}
+        //             // });
+        //         } else if (incomingData.activeLegID) {
+        //             // this.props.driver.activeLegID = incomingData.activeLegID;
+        //             const leg = legs.find(s => s.legID === incomingData.activeLegID);
+        //             this.legChange(leg);
+        //             //   this.setState({
+        //             //     driver:{...this.props.activeLegID,activeLegID: event.data.activeLegID}
+        //             //   });
+        //         }
+        //     }
+        // };
     }
 
     render() {
@@ -184,7 +226,7 @@ class Canvas extends React.Component {
                         onChange={this.legChange}
                     ></LegsDropDown>
                     <LegProgess
-                        inputRef={el => (this.inputElement = el)} 
+                        inputRef={el => (this.inputElement = el)}
                     ></LegProgess>
                 </div>
                 <div>
@@ -197,7 +239,6 @@ class Canvas extends React.Component {
                 <div>
                     <button onClick={() => { this.drawStops() }}>drawStops</button>
                     <button onClick={() => { this.drawLegs() }}>drawLegs</button>
-                    <button onClick={() => { this.sendMessage() }}>sendMessage</button>
                 </div>
                 <div>
                     <ul>

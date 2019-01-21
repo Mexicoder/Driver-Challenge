@@ -8,7 +8,7 @@ function LegProgess(props) {
             readOnly
             value={props.legProgress || 0 + '%'}
         ></input>
-    );
+    ); 
 }
 
 export default LegProgess;

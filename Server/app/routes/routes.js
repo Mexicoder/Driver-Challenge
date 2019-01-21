@@ -27,32 +27,16 @@ module.exports = function (app, db) {
 
     // update the driver's current position
     app.put('/driver', (req, res) => {
-        // req.
-        if(req.data.activeLegID && req.data.legProgress){
-            db.driver = req.data;
+
+        console.log(req.body);
+        if (req.body && req.body.activeLegID && req.body.legProgress) {
+            db.driver = req.body;
+            console.log('PUT driver');
+            res.send({msg:'success'});
+        } else {
+            console.log('PUT driver incorrectData');
+            res.status(500);
         }
-        req
-        console.log('PUT driver');
     });
 
 };
-
-// https://expressjs.com/en/guide/routing.html
-// var express = require('express')
-// var router = express.Router()
-
-// // middleware that is specific to this router
-// router.use(function timeLog (req, res, next) {
-//   console.log('Time: ', Date.now())
-//   next()
-// })
-// // define the home page route
-// router.get('/', function (req, res) {
-//   res.send('Birds home page')
-// })
-// // define the about route
-// router.get('/about', function (req, res) {
-//   res.send('About birds')
-// })
-
-// module.exports = router

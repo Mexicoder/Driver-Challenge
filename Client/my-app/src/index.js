@@ -75,12 +75,15 @@ class App extends React.Component {
     const socket = this.state.socket;
 
     socket.onopen = function () {
-      socket.send('something client ');
+      socket.send(JSON.stringify({ msg: 'Hello' }));
     };
-    socket.onmessage = function (event) {
-      this.setState = { Message: event.data };
-      console.log(event.data);
-    };
+  }
+
+  shouldComponentUpdate(nextProps, nextState) {
+    if (this.state.driver === nextState.driver) {
+      return true;
+    }
+    return false;
   }
 
   render() {
@@ -116,22 +119,22 @@ ReactDOM.render(
   var lastTime = 0;
   var vendors = ['ms', 'moz', 'webkit', 'o'];
   for (var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
-      window.requestAnimationFrame = window[vendors[x] + 'RequestAnimationFrame'];
-      window.cancelAnimationFrame = window[vendors[x] + 'CancelAnimationFrame'] || window[vendors[x] + 'CancelRequestAnimationFrame'];
+    window.requestAnimationFrame = window[vendors[x] + 'RequestAnimationFrame'];
+    window.cancelAnimationFrame = window[vendors[x] + 'CancelAnimationFrame'] || window[vendors[x] + 'CancelRequestAnimationFrame'];
   }
 
   if (!window.requestAnimationFrame) window.requestAnimationFrame = function (callback, element) {
-      var currTime = new Date().getTime();
-      var timeToCall = Math.max(0, 16 - (currTime - lastTime));
-      var id = window.setTimeout(function () {
-          callback(currTime + timeToCall);
-      },
+    var currTime = new Date().getTime();
+    var timeToCall = Math.max(0, 16 - (currTime - lastTime));
+    var id = window.setTimeout(function () {
+      callback(currTime + timeToCall);
+    },
       timeToCall);
-      lastTime = currTime + timeToCall;
-      return id;
+    lastTime = currTime + timeToCall;
+    return id;
   };
 
   if (!window.cancelAnimationFrame) window.cancelAnimationFrame = function (id) {
-      clearTimeout(id);
+    clearTimeout(id);
   };
 }());

@@ -11,6 +11,7 @@ const port = 8000;
 app.use(cors())
 
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json()); //parse application/json
 
 require('./app/routes')(app, data);
 
@@ -27,14 +28,22 @@ wss.on('connection', function connection(ws, req) {
     console.log("websocket connection open");
 
     ws.on('message', function incoming(message) {
-        console.log('received: %s', message);
+        const incomingMessage = JSON.parse(message);
+        if (incomingMessage.legProgress) {
+            // do nothing
+        } else{
+
+            console.log('received: %s', message);
+            
             // Broadcast to everyone else.
             wss.clients.forEach(function each(client) {
-              if (client !== ws && client.readyState === WebSocket.OPEN) {
-                client.send(message);
-                client.send("broadcast message");
-              }
+                if (client !== ws && client.readyState === WebSocket.OPEN) {
+                    client.send(message);
+                    client.send(JSON.stringify({msg:"broadcast message"}));
+                    console.log("broadcast message");
+                }
             });
+        }
     });
 
     ws.send('hello');
