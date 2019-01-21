@@ -44,24 +44,7 @@ wss.on('connection', function connection(ws, req) {
                 }
             });
         }
+        ws.send(JSON.stringify({msg:"Hello Client"}));
     });
 
-    ws.send('hello');
-
-    // ws.send({msg: 'something server'});
-    setTimeout(() => {
-        ws.send('yo, im a delayed msg 2')
-    }, 1000)
 });
-
-
-// Broadcast to all.
-// wss.broadcast = function broadcast(data) {
-//     console.log('Broadcast to client');
-//     wss.clients.forEach(function each(client) {
-//         console.log('Broadcast to client');
-//         if (client.readyState === WebSocket.OPEN) {
-//             client.send(data);
-//         }
-//     });
-// };

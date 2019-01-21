@@ -75,15 +75,13 @@ class App extends React.Component {
     const socket = this.state.socket;
 
     socket.onopen = function () {
-      socket.send(JSON.stringify({ msg: 'Hello' }));
+      socket.send(JSON.stringify({ msg: 'connected' }));
     };
-  }
-
-  shouldComponentUpdate(nextProps, nextState) {
-    if (this.state.driver === nextState.driver) {
-      return true;
-    }
-    return false;
+    // My attempt at adding sockets
+    socket.onmessage = function (event) {
+      const incomingData = JSON.parse(event.data);
+      console.log(incomingData);
+    };
   }
 
   render() {

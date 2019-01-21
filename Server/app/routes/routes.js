@@ -29,13 +29,15 @@ module.exports = function (app, db) {
     app.put('/driver', (req, res) => {
 
         console.log(req.body);
-        if (req.body && req.body.activeLegID && req.body.legProgress) {
+
+        if (req.body !== undefined && req.body.activeLegID  !== undefined && req.body.legProgress !== undefined ) {
             db.driver = req.body;
             console.log('PUT driver');
-            res.send({msg:'success'});
+            res.send({ msg: 'success' });
         } else {
-            console.log('PUT driver incorrectData');
+            console.log('PUT driver incorrectData',req.body);
             res.status(500);
+            res.send();
         }
     });
 
